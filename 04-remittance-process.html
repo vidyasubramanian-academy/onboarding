@@ -486,6 +486,15 @@ function render() {
         ${c.big ? `<div class="cols"><div><div class="big">${esc(c.big)}</div><div class="big-cap">${md(c.bigCaption || "")}</div></div><div>${points(c.points)}</div></div>` : points(c.points)}
         ${chips(c.chips)}${callout(t("thinkAbout"), c.think)}</div>`;
       break;
+    case "dodont":
+      h = `${eb}<h2>${esc(c.title)}</h2><div class="body">${c.text ? `<p class="lead">${md(c.text)}</p>` : ""}
+        <div class="cols"><div class="dd do"><h3>${esc(c.doLabel || t("do"))}</h3><ul>${(c.do || []).map(x => `<li><span>${md(x)}</span></li>`).join("")}</ul></div>
+        <div class="dd dont"><h3>${esc(c.dontLabel || t("dont"))}</h3><ul>${(c.dont || []).map(x => `<li><span>${md(x)}</span></li>`).join("")}</ul></div></div></div>`;
+      break;
+    case "quote":
+      h = `${eb}<div class="body" style="justify-content:center"><p class="quote">“${esc(c.quote)}”</p>
+        ${c.text ? `<p class="lead">${md(c.text)}</p>` : ""}${chips(c.chips)}</div>`;
+      break;
     case "flip":
       h = `${eb}<h2>${esc(c.title || t("flipTitle"))}</h2>
         <div class="flip ${state.flipped[K] ? "on" : ""}" id="flip"><div class="flip-inner" tabindex="0" role="button" aria-pressed="${!!state.flipped[K]}" aria-label="${esc(t("flipHint"))}">

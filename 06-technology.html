@@ -167,6 +167,9 @@ textarea:focus{outline:3px solid var(--gold);outline-offset:1px;border-color:var
 /* Phones: Back/Next stay pinned at the bottom of the screen, with their labels */
 @media (max-width:520px){.nav{min-width:0;padding:12px 16px;font-size:15px}.card{min-height:auto}.count{display:none}.controls{position:sticky;bottom:0;z-index:5;gap:10px;margin-top:-6px;padding:16px 0 max(10px,env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,rgba(243,233,218,0),var(--sand) 28%)}.gate:empty{display:none}.big{font-size:min(64px,17vw)}:root:not([lang="en"]) .big{font-size:min(56px,15vw)}}
 .fq-form,.fq-form label,.fq-form input,.cols>*{min-width:0}.fq-form input{width:100%}
+
+/* Flip cards grow to fit the longer side; nothing is cut off on small screens */
+.flip-inner{display:grid}.face{position:relative;inset:auto;grid-area:1/1}
 </style>
 
 <div class="app">
@@ -413,6 +416,8 @@ function render() {
     }
   }
   $("stage").innerHTML = `<article class="card ${dark ? "dark" : ""}">${h}<div class="foot"><span>VSA · ${esc(D("footer") || t("footer"))}</span><span>${String(i + 1).padStart(2, "0")}</span></div></article>`;
+  document.querySelectorAll(".big").forEach(b => { b.style.fontSize = ""; let s = parseFloat(getComputedStyle(b).fontSize);
+    while (s > 30 && b.scrollWidth > b.clientWidth + 1) { s -= 2; b.style.fontSize = s + "px"; } });
   $("count").textContent = `${i + 1} / ${N}`;
   [...$("track").children].forEach((el, k) => el.className = k < i ? "done" : k === i ? "now" : "");
   $("prev").disabled = i === 0;

@@ -59,8 +59,8 @@ h2{font-size:clamp(28px,4.4vw,42px)}
 .points{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .points li{display:flex;gap:12px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-weight:600}
 .points li::before{content:"";flex:none;width:8px;height:8px;margin-top:9px;border-radius:50%;background:var(--bronze)}
-.big{font-family:var(--display);font-weight:700;font-size:clamp(64px,11vw,108px);line-height:.9;color:var(--maroon)}
-.big-cap{color:var(--muted);font-size:17px;max-width:30ch}
+.big{font-family:var(--display);font-weight:700;font-size:clamp(64px,11vw,108px);line-height:1.05;color:var(--maroon)}
+.big-cap{color:var(--muted);font-size:17px;line-height:1.45;max-width:30ch;margin-top:14px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{background:var(--sand);color:var(--maroon);font-weight:700;font-size:14px;padding:7px 14px;border-radius:999px}
 .dark .chip{background:var(--maroon-2);color:var(--on-maroon)}
@@ -169,6 +169,9 @@ textarea:focus{outline:3px solid var(--gold);outline-offset:1px;border-color:var
 .fq-form,.fq-form label,.fq-form input,.cols>*{min-width:0}.fq-form input{width:100%}
 .lang[hidden]{display:none}
 .pick .pl{display:block;font-weight:800}.pick .pn{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-top:2px}.opt.pick.picked .pn{color:var(--maroon)}
+
+/* Flip cards grow to fit the longer side; nothing is cut off on small screens */
+.flip-inner{display:grid}.face{position:relative;inset:auto;grid-area:1/1}
 </style>
 
 <div class="app">
@@ -494,6 +497,8 @@ function render() {
   }
   const footL = c._pw ? pLabel(c._pw) : (D("footer") || t("footer"));
   $("stage").innerHTML = `<article class="card ${dark ? "dark" : ""}">${h}<div class="foot"><span>VSA · ${esc(footL)}</span><span>${String(i + 1).padStart(2, "0")}</span></div></article>`;
+  document.querySelectorAll(".big").forEach(b => { b.style.fontSize = ""; let s = parseFloat(getComputedStyle(b).fontSize);
+    while (s > 30 && b.scrollWidth > b.clientWidth + 1) { s -= 2; b.style.fontSize = s + "px"; } });
   $("count").textContent = `${i + 1} / ${N}`;
   $("track").innerHTML = cards.map((_, k) => `<i class="${k < i ? "done" : k === i ? "now" : ""}"></i>`).join("");
   $("prev").disabled = i === 0;

@@ -71,6 +71,8 @@ label.f input:focus,label.f select:focus,label.f textarea:focus{outline:3px soli
 label.f textarea{min-height:64px;resize:vertical}
 .req{color:var(--accent)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.sgroup{margin-top:10px}
+.sgl{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
 .chip{border:1.5px solid var(--line);background:var(--field);font-weight:600;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;user-select:none}
 .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -117,7 +119,11 @@ label.f textarea{min-height:64px;resize:vertical}
 .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
 .filters label.f{min-width:140px}
 .filters label.f.grow{flex:1;min-width:180px}
-.daypick{display:flex;gap:4px;margin-top:5px}
+.daypick{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.timerange{display:flex;align-items:center;gap:8px;margin-top:5px}
+.timerange select{padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--field);font-size:16px;min-width:118px}
+.timerange select:focus{outline:3px solid var(--gold);outline-offset:1px}
+.timerange span{color:var(--ink-2);font-weight:700}
 .daypick button{border:1.5px solid var(--line);background:var(--field);font-weight:700;border-radius:8px;padding:8px 0;width:42px;font-size:13px;cursor:pointer}
 .daypick button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .headline{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;color:var(--maroon);font-size:28px;margin:4px 0 2px}
@@ -171,22 +177,22 @@ table.dir tr.r:hover td{background:var(--line-2)}
   <section id="teacherView" class="hidden">
     <div id="tForm">
       <div class="hero">
-        <h1>When are you free to teach?</h1>
+        <h1>Please share your teaching availability</h1>
         <hr class="rule">
-        <p class="muted">Mark the hours in a typical week when you can take classes. This helps us match you with students whose schedules fit yours. It takes about three minutes. If your week changes later, simply fill this in again with the same email: your newest entry replaces the old one.</p>
+        <p class="muted">Please mark the hours in a typical week when you can teach classes. This helps us match you with students whose schedules fit yours.</p>
       </div>
       <div class="stack">
         <div class="card stack">
           <div><div class="step-label">Step 1 · About you</div></div>
           <div class="grid2">
             <label class="f">Full name <span class="req">*</span><input id="fName" autocomplete="name" required></label>
-            <label class="f">Email <span class="req">*</span><input id="fEmail" type="email" autocomplete="email" required></label>
-            <label class="f">WhatsApp number <span class="faint">(optional)</span><input id="fPhone" type="tel" autocomplete="tel" placeholder="+91 …"></label>
+            <label class="f">Email ID <span class="req">*</span><input id="fEmail" type="email" autocomplete="email" required></label>
+            <label class="f">WhatsApp number <span class="faint">(optional, with country code)</span><input id="fPhone" type="tel" autocomplete="tel" placeholder="+91 …"></label>
             <label class="f">Your time zone<select id="fTz"></select></label>
           </div>
           <div>
-            <label class="f">What do you teach? <span class="req">*</span></label>
-            <div class="chips" id="fSubjects"></div>
+            <label class="f">What do you teach? <span class="req">*</span> <span class="faint">(choose all that apply)</span></label>
+            <div id="fSubjects"></div>
           </div>
         </div>
 
@@ -215,7 +221,7 @@ table.dir tr.r:hover td{background:var(--line-2)}
     <div id="tDone" class="card done hidden">
       <div class="tick">✓</div>
       <h2>Thank you, <span id="doneName"></span></h2>
-      <p class="muted" style="max-width:460px;margin:8px auto 18px">Your availability has reached the VSA team. Whenever your week changes, open this same link and fill it in afresh with the same email. Your newest entry always replaces the earlier one.</p>
+      <p class="muted" style="max-width:460px;margin:8px auto 18px">Your availability has been sent to the VSA team.</p>
       <button class="btn ghost" id="editAgain">Back to the form</button>
     </div>
   </section>
@@ -233,10 +239,12 @@ table.dir tr.r:hover td{background:var(--line-2)}
         <div class="filters">
           <label class="f">Student's time zone<select id="qTz"></select></label>
           <div><label class="f">Days</label><div class="daypick" id="qDays"></div></div>
-          <label class="f">From<select id="qFrom"></select></label>
-          <label class="f">To<select id="qTo"></select></label>
+        </div>
+        <div class="filters" style="margin-top:14px">
+          <div><label class="f">Time</label>
+            <div class="timerange"><select id="qFrom" aria-label="From"></select><span>to</span><select id="qTo" aria-label="To"></select></div></div>
           <label class="f">Subject<select id="qSubj"><option value="">Any subject</option></select></label>
-          <label class="f">Match<select id="qMode"><option value="full">Free for the whole time</option><option value="part">Free for part of it</option></select></label>
+          <label class="f">Show teachers who are<select id="qMode"><option value="full">Free for the entire time</option><option value="part">Free for at least part of it</option></select></label>
         </div>
         <div class="row small muted" style="margin-top:12px">
           <label><input type="checkbox" id="qStale"> Hide teachers who haven't updated in <span id="staleDays"></span> days</label>
@@ -287,7 +295,12 @@ const CONFIG = {
   // Leave empty to run as a self-contained prototype with sample data.
   API_URL: "https://script.google.com/macros/s/AKfycbwVjzKDnf8KDR3A1efpTLMxDNe8A4cVqWEUmErF67lYE4Ayg9DmujuWFQslhxmhCHhtdA/exec",
   STALE_DAYS: 120,          // flag teachers who haven't updated in this many days
-  SUBJECTS: ["Carnatic vocal","Hindustani vocal","Melodic instrument","Percussion","Bharatanatyam","Languages","Slokas & Tamil chants","Fun with Vedic Math","Yoga","Konnakol"]
+  // VSA programmes, as in the playbook. Each item is what's stored in the Sheet.
+  SUBJECT_GROUPS: [
+    { group:"Carnatic music", items:["Carnatic vocal","Flute","Violin","Veena","Mridangam","Kanjira"], instruments:["Flute","Violin","Veena","Mridangam","Kanjira"] },
+    { group:"Hindustani music", items:["Hindustani vocal","Tabla"] },
+    { group:"Other programmes", items:["Bharatanatyam","Konnakol","Slokas & Tamil chants","Languages","Yoga & meditation","Fun with Vedic Math"] }
+  ]
 };
 
 /* ==================================================================
@@ -299,10 +312,14 @@ const CONFIG = {
 const Q = 96, W = 672, IST = "Asia/Kolkata", IST_OFF = 330;
 const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const DS = DAYS.map(d => d.slice(0,3));
+// Country calling code to suggest in the WhatsApp hint, per time zone (hint only; nothing is pre-filled)
+const DIAL = {"Asia/Kolkata":"+91","Asia/Kathmandu":"+977","Asia/Colombo":"+94","Asia/Dubai":"+971","Asia/Qatar":"+974","Asia/Bangkok":"+66","Asia/Singapore":"+65",
+  "Asia/Hong_Kong":"+852","Asia/Tokyo":"+81","Australia/Perth":"+61","Australia/Sydney":"+61","Pacific/Auckland":"+64","Africa/Nairobi":"+254","Indian/Mauritius":"+230",
+  "Africa/Johannesburg":"+27","Europe/London":"+44","America/Halifax":"+1","America/New_York":"+1","America/Chicago":"+1","America/Denver":"+1","America/Los_Angeles":"+1"};
 const TZS = [
   ["Asia/Kolkata","India (IST)"],["Asia/Kathmandu","Nepal"],["Asia/Colombo","Sri Lanka"],["Asia/Dubai","UAE / Oman"],["Asia/Qatar","Qatar / Saudi Arabia"],
-  ["Asia/Singapore","Singapore / Malaysia"],["Asia/Tokyo","Japan"],["Australia/Perth","Australia – Perth"],["Australia/Sydney","Australia – Sydney / Melbourne"],["Pacific/Auckland","New Zealand"],
-  ["Europe/London","UK / Ireland"],["Europe/Berlin","Central Europe"],["Africa/Johannesburg","South Africa"],
+  ["Asia/Bangkok","Thailand / Vietnam"],["Asia/Singapore","Singapore / Malaysia"],["Asia/Hong_Kong","Hong Kong / China"],["Asia/Tokyo","Japan"],["Australia/Perth","Australia – Perth"],["Australia/Sydney","Australia – Sydney / Melbourne"],["Pacific/Auckland","New Zealand"],
+  ["Africa/Nairobi","Kenya / East Africa"],["Indian/Mauritius","Mauritius"],["Africa/Johannesburg","South Africa"],["Europe/London","UK / Ireland"],["Europe/Berlin","Central Europe"],["America/Halifax","Canada – Atlantic"],
   ["America/New_York","US / Canada – Eastern"],["America/Chicago","US – Central"],["America/Denver","US – Mountain"],["America/Los_Angeles","US / Canada – Pacific"]
 ];
 function tzOffset(tz){ // minutes ahead of UTC, right now (handles daylight saving)
@@ -332,8 +349,9 @@ function tzLabel(tz){
   return (hit ? hit[1] : tz.replace(/_/g," ")) + " · " + rel;
 }
 function fillTzSelect(sel, chosen){
-  const list = TZS.slice(); if (!list.some(t => t[0] === chosen)) list.unshift([chosen, chosen.replace(/_/g," ")]);
-  sel.innerHTML = list.map(t => `<option value="${t[0]}">${esc(tzLabel(t[0]))}</option>`).join("");
+  // The common list; if the teacher's own detected zone isn't in it, it's added at the top.
+  const list = TZS.slice(); if (!list.some(t => t[0] === chosen)) list.unshift([chosen, chosen.replace(/_/g," ").split("/").pop()]);
+  sel.innerHTML = list.map(t => `<option value="${esc(t[0])}">${esc(tzLabel(t[0]))}</option>`).join("");
   sel.value = chosen;
 }
 /* compact storage: "100-104,200-210" (inclusive IST indices) */
@@ -361,6 +379,7 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const store = { get(k){ try{return localStorage.getItem(k);}catch(e){return null;} }, set(k,v){ try{localStorage.setItem(k,v);}catch(e){} } };
 const IN_GAS = typeof google !== "undefined" && google.script && google.script.run;   // served by the Finder script
 const DEMO = !IN_GAS && !CONFIG.API_URL;
+CONFIG.SUBJECTS = CONFIG.SUBJECT_GROUPS.flatMap(g => g.items);
 
 /* ==================================================================
    API (Google Apps Script) — or in-memory prototype store
@@ -402,10 +421,12 @@ const cellLabel = (li) => `${DAYS[Math.floor(li/Q)]} ${fmtRange((li%Q)*15, (li%Q
 const T = { tz: (({"Asia/Calcutta":IST})[Intl.DateTimeFormat().resolvedOptions().timeZone] || Intl.DateTimeFormat().resolvedOptions().timeZone || IST), sel: new Set(), subjects: new Set(), night:false };
 function teacherInit(){
   fillTzSelect($("#fTz"), T.tz);
-  $("#fSubjects").innerHTML = CONFIG.SUBJECTS.map(s => `<span class="chip" tabindex="0" role="checkbox" aria-checked="false" data-s="${esc(s)}">${esc(s)}</span>`).join("");
+  $("#fSubjects").innerHTML = CONFIG.SUBJECT_GROUPS.map(g => `<div class="sgroup"><div class="sgl">${esc(g.group)}</div><div class="chips">` +
+    g.items.map(s => `<span class="chip" tabindex="0" role="checkbox" aria-checked="false" data-s="${esc(s)}">${esc(s)}</span>`).join("") + `</div></div>`).join("");
   $$("#fSubjects .chip").forEach(ch => { const tog = () => { const s = ch.dataset.s; T.subjects.has(s) ? T.subjects.delete(s) : T.subjects.add(s); ch.classList.toggle("on"); ch.setAttribute("aria-checked", ch.classList.contains("on")); };
     ch.onclick = tog; ch.onkeydown = e => { if (e.key===" "||e.key==="Enter"){ e.preventDefault(); tog(); } }; });
-  $("#fTz").onchange = e => { T.tz = e.target.value; drawTeacherGrid(); };
+  $("#fTz").onchange = e => { T.tz = e.target.value; phoneHint(); drawTeacherGrid(); };
+  phoneHint();
   $("#toggleNight").onclick = () => { T.night = !T.night; $("#toggleNight").textContent = T.night ? "Hide 12–4 AM" : "Show 12–4 AM"; drawTeacherGrid(); };
   $("#clearAll").onclick = () => { T.sel.clear(); paintTeacher(); };
   $("#copyMon").onclick = () => {
@@ -417,6 +438,7 @@ function teacherInit(){
   $("#editAgain").onclick = () => { $("#tDone").classList.add("hidden"); $("#tForm").classList.remove("hidden"); window.scrollTo(0,0); };
   drawTeacherGrid();
 }
+function phoneHint(){ $("#fPhone").placeholder = (DIAL[T.tz] || "+ country code") + " …"; }
 function drawTeacherGrid(){
   $("#tzName").textContent = tzLabel(T.tz).split(" · ")[0];
   const g = $("#tGrid"); buildWeek(g, {startHour: T.night ? 0 : 4}); paintTeacher();
@@ -467,7 +489,9 @@ function teamInit(){
   const times = []; for (let m = 0; m <= 1440; m += 15) times.push(m);
   $("#qFrom").innerHTML = times.slice(0,-1).map(m => `<option value="${m}">${fmt(m)}</option>`).join("");
   $("#qTo").innerHTML = times.slice(1).map(m => `<option value="${m}">${m===1440 ? "Midnight" : fmt(m)}</option>`).join("");
-  $("#qSubj").innerHTML += CONFIG.SUBJECTS.map(s => `<option>${esc(s)}</option>`).join("");
+  $("#qSubj").innerHTML += CONFIG.SUBJECT_GROUPS.map(g => `<optgroup label="${esc(g.group)}">` +
+    (g.instruments ? `<option value="@inst">Any Carnatic instrument</option>` : "") +
+    g.items.map(s => `<option>${esc(s)}</option>`).join("") + `</optgroup>`).join("");
   $$("#qDays button").forEach(b => b.onclick = () => { const d = +b.dataset.d; S.days.has(d) && S.days.size > 1 ? S.days.delete(d) : S.days.add(d); syncControls(); render(); });
   $("#qTz").onchange = e => { S.tz = e.target.value; render(); };
   $("#qFrom").onchange = e => { S.from = +e.target.value; if (S.to <= S.from) S.to = Math.min(1440, S.from + 60); syncControls(); render(); };
@@ -492,14 +516,17 @@ async function refreshTeam(silent){
     S.rows = await apiList();
     S.parsed = S.rows.map(r => ({...r, set: decode(r.slots), subjects: Array.isArray(r.subjects) ? r.subjects : String(r.subjects||"").split(/\s*,\s*/).filter(Boolean)}));
     S.loaded = new Date();
-    $("#syncInfo").textContent = `${S.parsed.length} teachers · loaded ${S.loaded.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}`;
+    $("#syncInfo").textContent = `${S.parsed.length} ${S.parsed.length===1?"teacher":"teachers"} · loaded ${S.loaded.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}`;
     render();
   }catch(e){
     $("#syncInfo").textContent = "Couldn't load the sheet. Please refresh, or check you're signed in with a VSA team account.";
   }
 }
 const isStale = r => r.updated && (Date.now() - new Date(r.updated).getTime()) > CONFIG.STALE_DAYS*864e5;
-function pool(){ return S.parsed.filter(r => (!S.subj || r.subjects.includes(S.subj)) && !(S.hideStale && isStale(r))); }
+function teaches(r){ if (!S.subj) return true;
+  if (S.subj === "@inst"){ const inst = CONFIG.SUBJECT_GROUPS[0].instruments; return r.subjects.some(x => inst.includes(x)); }
+  return r.subjects.includes(S.subj); }
+function pool(){ return S.parsed.filter(r => teaches(r) && !(S.hideStale && isStale(r))); }
 function windowFor(d){ const out = []; for (let m = S.from; m < S.to; m += 15) out.push(toIST(d*Q + m/15, S.tz)); return out; }
 function ago(iso){ if (!iso) return "unknown"; const days = Math.floor((Date.now() - new Date(iso))/864e5);
   return days < 1 ? "today" : days < 2 ? "yesterday" : days < 45 ? days + " days ago" : Math.round(days/30) + " months ago"; }
@@ -515,7 +542,7 @@ function renderMatch(){
   list.sort((a,b) => b.score - a.score || a.r.name.localeCompare(b.r.name));
   const when = `${days.map(d=>DS[d]).join(", ")} · ${fmtRange(S.from, S.to)} ${S.tz===IST ? "IST" : "(" + tzLabel(S.tz).split(" · ")[0] + ")"}`;
   $("#qHeadline").textContent = list.length ? `${list.length} ${list.length===1?"teacher is":"teachers are"} free ${S.mode==="part"?"for some of ":""}${when}` : `No one is free ${when}`;
-  $("#qSub").textContent = (S.subj ? `Teaching ${S.subj}. ` : "") + (S.tz !== IST ? `That window is ${(() => { const s = toIST(days[0]*Q + S.from/15, S.tz); return DS[Math.floor(s/Q)] + " " + fmt((s%Q)*15); })()} onwards in India.` : "") + (list.length ? "" : " Try “Free for part of it”, another day, or the Week at a glance tab to see when teachers are free.");
+  $("#qSub").textContent = (S.subj ? `Teaching ${S.subj === "@inst" ? "a Carnatic instrument" : S.subj}. ` : "") + (S.tz !== IST ? `That window is ${(() => { const s = toIST(days[0]*Q + S.from/15, S.tz); return DS[Math.floor(s/Q)] + " " + fmt((s%Q)*15); })()} onwards in India.` : "") + (list.length ? "" : " Try “Free for part of it”, another day, or the Week at a glance tab to see when teachers are free.");
   $("#qResults").innerHTML = list.length ? list.map(({r, per}) => {
     const theirs = r.timezone && r.timezone !== S.tz ? (() => { const s = toLocal(toIST(per[0].d*Q + S.from/15, S.tz), r.timezone); return `Their time: ${DS[Math.floor(s/Q)]} ${fmt((s%Q)*15)} (${esc(tzLabel(r.timezone).split(" · ")[0])})`; })() : "";
     return `<div class="tcard">
@@ -545,7 +572,7 @@ function renderHeat(){
     c.onclick = () => { $("#tip").classList.add("hidden"); S.days = new Set([Math.floor(li/Q)]); S.from = (li%Q)*15; S.to = Math.min(1440, S.from + 60); syncControls();
       S.tab = "match"; $$(".tabs button").forEach(x => x.classList.toggle("on", x.dataset.tab==="match")); ["match","heat","dir"].forEach(t => $("#tab-"+t).classList.toggle("hidden", t!=="match")); render(); window.scrollTo({top:0,behavior:"smooth"}); };
   });
-  $("#heatSubj").textContent = S.subj ? ` teaching ${S.subj}` : "";
+  $("#heatSubj").textContent = S.subj ? ` teaching ${S.subj === "@inst" ? "a Carnatic instrument" : S.subj}` : "";
 }
 
 function miniWeek(set, tz){ // small SVG week strip, in tz
@@ -587,9 +614,9 @@ function demoSeed(){
       slots: mk([[[1,2,3,4],4,0,5,0],[[0,5,6],17,30,18,30],[[0,1,2,3,4,5,6],18,45,19,45],[[0,6],9,15,10,15],[[0,6],10,30,11,30],[[6],13,0,14,0],[[0],15,30,16,30]]) },
     { name:"Sample · Meera R.", email:"meera@example.com", phone:"+91 90000 00001", subjects:["Carnatic vocal","Slokas & Tamil chants"], timezone:IST, notes:"", updated:daysAgo(12), created:daysAgo(40),
       slots: mk([[[1,3,5],14,0,17,0],[[2,4],6,0,8,0],[[0],9,0,12,0]]) },
-    { name:"Sample · Arjun K.", email:"arjun@example.com", phone:"", subjects:["Percussion","Konnakol"], timezone:IST, notes:"Mridangam and kanjira", updated:daysAgo(200), created:daysAgo(200),
+    { name:"Sample · Arjun K.", email:"arjun@example.com", phone:"", subjects:["Mridangam","Kanjira","Konnakol"], timezone:IST, notes:"Mridangam and kanjira", updated:daysAgo(200), created:daysAgo(200),
       slots: mk([[[1,2,3,4,5],19,0,22,0],[[3],13,0,16,0]]) },
-    { name:"Sample · Lavanya S.", email:"lavanya@example.com", phone:"", subjects:["Carnatic vocal","Melodic instrument"], timezone:"America/New_York", notes:"Veena", updated:daysAgo(30), created:daysAgo(90),
+    { name:"Sample · Lavanya S.", email:"lavanya@example.com", phone:"", subjects:["Carnatic vocal","Veena"], timezone:"America/New_York", notes:"", updated:daysAgo(30), created:daysAgo(90),
       slots: mk([[[1,2,3,4,5],5,30,8,30],[[3,6],19,30,22,30]]) },
     { name:"Sample · Priya N.", email:"priya@example.com", phone:"", subjects:["Bharatanatyam"], timezone:IST, notes:"", updated:daysAgo(8), created:daysAgo(8),
       slots: mk([[[3,4],14,0,15,30],[[6,0],8,0,12,0]]) },

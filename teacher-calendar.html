@@ -97,6 +97,7 @@ label.f textarea{min-height:64px;resize:vertical}
 .cell{height:12px;border-left:1px solid var(--line-2);background:var(--field);touch-action:none;cursor:pointer}
 .cell.hr{border-top:1px solid var(--line)}
 .cell.half{border-top:1px dashed var(--line-2)}
+.cell.low{background:repeating-linear-gradient(135deg,var(--field) 0 4px,#E6D8C2 4px 6px)}
 .cell.on{background:var(--pick);border-left-color:var(--pick-edge)}
 .cell.preview-add{background:color-mix(in srgb,var(--pick) 60%,var(--card))}
 .cell.preview-del{background:color-mix(in srgb,var(--ink-3) 25%,var(--card))}
@@ -107,6 +108,17 @@ label.f textarea{min-height:64px;resize:vertical}
 .cell.q-bot{box-shadow:inset 2px 0 0 var(--ink),inset -2px 0 0 var(--ink),inset 0 -2px 0 var(--ink)}
 .cell.q-one{box-shadow:inset 0 0 0 2px var(--ink)}
 
+.legend2{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin:4px 0 10px}
+.legend2 i{display:inline-block;width:18px;height:12px;border:1px solid var(--line);border-radius:3px;vertical-align:-2px;margin-right:6px}
+.peaknote{font-size:14px;padding:12px 14px;border-radius:12px;background:var(--warn-soft);color:var(--ink);margin:0 0 10px;border-left:4px solid var(--gold)}
+.hint{display:block;font-weight:400;font-size:13px;color:var(--ink-3);margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--field);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.stat b{display:block;font-family:"Cormorant Garamond",Georgia,serif;font-size:30px;line-height:1;color:var(--maroon)}
+.stat span{font-size:13px;color:var(--ink-2)}
+.stat.key{background:var(--maroon);border-color:var(--maroon)} .stat.key b{color:var(--gold)} .stat.key span{color:#F1E3E0}
+.week.view .cell{cursor:default}
+.linkbtn{border:0;background:none;color:var(--maroon);font-weight:700;cursor:pointer;padding:0;font-size:13px;text-decoration:underline}
 .summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px 18px;font-size:13px}
 .summary div b{display:inline-block;min-width:38px;color:var(--ink)}
 
@@ -127,7 +139,8 @@ label.f textarea{min-height:64px;resize:vertical}
 .daypick button{border:1.5px solid var(--line);background:var(--field);font-weight:700;border-radius:8px;padding:8px 0;width:42px;font-size:13px;cursor:pointer}
 .daypick button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .headline{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;color:var(--maroon);font-size:28px;margin:4px 0 2px}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:24px 0 16px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:24px 0 16px;overflow-x:auto;scrollbar-width:none}
+.tabs button{white-space:nowrap}
 .tabs button{border:0;background:transparent;padding:10px 14px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:500}
 .tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
 .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
@@ -185,9 +198,9 @@ table.dir tr.r:hover td{background:var(--line-2)}
         <div class="card stack">
           <div><div class="step-label">Step 1 · About you</div></div>
           <div class="grid2">
-            <label class="f">Full name <span class="req">*</span><input id="fName" autocomplete="name" required></label>
+            <label class="f">Full name you wish to use for VSA purposes <span class="req">*</span><input id="fName" autocomplete="name" required><span class="hint">Please use the same spelling and initials you'd like on all VSA records.</span></label>
             <label class="f">Email ID <span class="req">*</span><input id="fEmail" type="email" autocomplete="email" required></label>
-            <label class="f">WhatsApp number <span class="faint">(optional, with country code)</span><input id="fPhone" type="tel" autocomplete="tel" placeholder="+91 …"></label>
+            <label class="f">WhatsApp number <span class="req">*</span><input id="fPhone" type="tel" autocomplete="tel" placeholder="+91 …" required><span class="hint">Please include the country code.</span></label>
             <label class="f">Your time zone<select id="fTz"></select></label>
           </div>
           <div>
@@ -198,7 +211,9 @@ table.dir tr.r:hover td{background:var(--line-2)}
 
         <div class="card">
           <div class="step-label">Step 2 · Your week</div>
-          <p class="muted small" style="margin-bottom:10px">Press and drag across the grid to mark the times you're free. Drag over marked times to clear them. Times are shown in <b id="tzName">your time zone</b>. On a phone, scroll the page using the time column on the left.</p>
+          <div class="peaknote"><b>Most of our students learn early in the morning, in the evening, and at weekends.</b> Please mark every slot you can offer between <b>4–8 AM</b> and <b>4 PM–midnight</b> (India time) on weekdays, and all the slots you can offer at <b>weekends</b>. Weekday daytime hours (shaded) have fewer students, but you may mark them too.</div>
+          <p class="muted small" style="margin-bottom:6px">Press and drag across the grid to mark the times you're free. Drag over marked times to clear them. Times are shown in <b id="tzName">your time zone</b>. On a phone, scroll the page using the time column on the left.</p>
+          <div class="legend2"><span><i style="background:var(--field)"></i>Peak hours</span><span><i style="background:repeating-linear-gradient(135deg,var(--field) 0 4px,#E6D8C2 4px 6px)"></i>Fewer students</span><span><i style="background:var(--pick)"></i>Marked as available</span></div>
           <div class="gridtools">
             <button class="btn ghost sm" id="copyMon">Copy Monday to all weekdays</button>
             <button class="btn ghost sm" id="toggleNight">Show 12–4 AM</button>
@@ -213,7 +228,6 @@ table.dir tr.r:hover td{background:var(--line-2)}
         <div class="card stack">
           <div class="step-label">Step 3 · Check and send</div>
           <div class="summary" id="tSummary"><span class="faint small">Your marked times will be listed here.</span></div>
-          <label class="f">Anything we should know? <span class="faint">(optional)</span><textarea id="fNotes" placeholder="e.g. Not available during the first week of every month; prefer group classes on weekends"></textarea></label>
           <div class="row"><button class="btn" id="submitBtn">Send my availability</button><span class="small muted" id="submitMsg"></span></div>
         </div>
       </div>
@@ -230,12 +244,27 @@ table.dir tr.r:hover td{background:var(--line-2)}
   <section id="teamView" class="hidden">
     <div id="teamBox">
       <div class="hero row" style="align-items:flex-end">
-        <div><h1>Find a teacher</h1><hr class="rule"><p class="muted">Tell the finder when the student is free. It shows every teacher whose marked week covers that time.</p></div>
+        <div><h1>Teacher availability</h1><hr class="rule"><p class="muted">See each teacher's week at a glance, or search for teachers who are free when a student is.</p></div>
         <span class="spacer"></span>
         <div class="row"><span class="small faint" id="syncInfo"></span><button class="iconbtn" id="refreshBtn" title="Reload from the sheet">↻ Refresh</button></div>
       </div>
 
-      <div class="card">
+      <div class="tabs" role="tablist">
+        <button class="on" data-tab="week">Teacher's week</button>
+        <button data-tab="match">Find by time</button>
+        <button data-tab="heat">Week at a glance</button>
+        <button data-tab="dir">All teachers</button>
+      </div>
+
+      <div id="tab-week">
+        <div class="filters" style="margin-bottom:6px">
+          <label class="f grow" style="max-width:380px">Teacher<select id="wTeacher"></select></label>
+          <label class="f">Show times in<select id="wTz"></select></label>
+        </div>
+        <div id="wBody"></div>
+      </div>
+
+      <div class="card hidden" id="filterCard" style="margin-bottom:18px">
         <div class="filters">
           <label class="f">Student's time zone<select id="qTz"></select></label>
           <div><label class="f">Days</label><div class="daypick" id="qDays"></div></div>
@@ -251,13 +280,7 @@ table.dir tr.r:hover td{background:var(--line-2)}
         </div>
       </div>
 
-      <div class="tabs" role="tablist">
-        <button class="on" data-tab="match">Matches</button>
-        <button data-tab="heat">Week at a glance</button>
-        <button data-tab="dir">All teachers</button>
-      </div>
-
-      <div id="tab-match">
+      <div id="tab-match" class="hidden">
         <div class="headline" id="qHeadline"></div>
         <p class="small muted" id="qSub" style="margin-bottom:14px"></p>
         <div class="results" id="qResults"></div>
@@ -265,7 +288,7 @@ table.dir tr.r:hover td{background:var(--line-2)}
 
       <div id="tab-heat" class="hidden">
         <div class="row" style="margin-bottom:10px">
-          <p class="small muted" style="margin:0">Each cell shows how many teachers<span id="heatSubj"></span> are free then, in the student's time zone. Click a cell to search the hour starting there.</p>
+          <p class="small muted" style="margin:0">Use this to see when the teaching pool is thin. Each cell shows how many teachers<span id="heatSubj"></span> are free then, in the student's time zone. Click a cell to search the hour starting there.</p>
           <span class="spacer"></span>
           <div class="legend"><span>fewer</span><span class="ramp" id="ramp"></span><span>more</span></div>
         </div>
@@ -418,6 +441,13 @@ const cellLabel = (li) => `${DAYS[Math.floor(li/Q)]} ${fmtRange((li%Q)*15, (li%Q
 /* ==================================================================
    TEACHER VIEW
    ================================================================== */
+/* VSA peak hours, in IST: weekdays 4–8 AM and 4 PM–midnight; all day Saturday and Sunday */
+function peakKind(ii){ const d = Math.floor(ii/Q), m = (ii%Q)*15;
+  if (d === 0 || d === 6) return "wk"; if (m >= 240 && m < 480) return "wm"; if (m >= 960) return "we"; return ""; }
+function peakStats(set){ const c = {wm:0, we:0, wk:0}; set.forEach(ii => { const k = peakKind(ii); if (k) c[k]++; });
+  return { total:set.size/4, wm:c.wm/4, we:c.we/4, wk:c.wk/4, peak:(c.wm+c.we+c.wk)/4 }; }
+const fh = h => (h % 1 ? h.toFixed(2).replace(/0$/,"") : String(h));
+function shadeLow(grid, tz){ grid.querySelectorAll(".cell").forEach(c => c.classList.toggle("low", !peakKind(toIST(+c.dataset.l, tz)))); }
 const T = { tz: (({"Asia/Calcutta":IST})[Intl.DateTimeFormat().resolvedOptions().timeZone] || Intl.DateTimeFormat().resolvedOptions().timeZone || IST), sel: new Set(), subjects: new Set(), night:false };
 function teacherInit(){
   fillTzSelect($("#fTz"), T.tz);
@@ -425,7 +455,7 @@ function teacherInit(){
     g.items.map(s => `<span class="chip" tabindex="0" role="checkbox" aria-checked="false" data-s="${esc(s)}">${esc(s)}</span>`).join("") + `</div></div>`).join("");
   $$("#fSubjects .chip").forEach(ch => { const tog = () => { const s = ch.dataset.s; T.subjects.has(s) ? T.subjects.delete(s) : T.subjects.add(s); ch.classList.toggle("on"); ch.setAttribute("aria-checked", ch.classList.contains("on")); };
     ch.onclick = tog; ch.onkeydown = e => { if (e.key===" "||e.key==="Enter"){ e.preventDefault(); tog(); } }; });
-  $("#fTz").onchange = e => { T.tz = e.target.value; phoneHint(); drawTeacherGrid(); };
+  $("#fTz").onchange = e => { T.tz = e.target.value; T.night = false; $("#toggleNight").textContent = "Show 12–4 AM"; phoneHint(); drawTeacherGrid(); };
   phoneHint();
   $("#toggleNight").onclick = () => { T.night = !T.night; $("#toggleNight").textContent = T.night ? "Hide 12–4 AM" : "Show 12–4 AM"; drawTeacherGrid(); };
   $("#clearAll").onclick = () => { T.sel.clear(); paintTeacher(); };
@@ -441,7 +471,10 @@ function teacherInit(){
 function phoneHint(){ $("#fPhone").placeholder = (DIAL[T.tz] || "+ country code") + " …"; }
 function drawTeacherGrid(){
   $("#tzName").textContent = tzLabel(T.tz).split(" · ")[0];
-  const g = $("#tGrid"); buildWeek(g, {startHour: T.night ? 0 : 4}); paintTeacher();
+  // India: 4 AM–midnight (12–4 AM on request). Elsewhere, VSA's peak hours can fall at any local hour, so show the whole day.
+  $("#toggleNight").classList.toggle("hidden", T.tz !== IST);
+  const g = $("#tGrid"); buildWeek(g, {startHour: (T.tz === IST && !T.night) ? 4 : 0}); shadeLow(g, T.tz); paintTeacher();
+  $("#tReadout").innerHTML = "&nbsp;";
   let anchor = null, snapshot = null, adding = true, last = null;
   const cellAt = e => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.classList.contains("cell") && g.contains(el) ? el : null; };
   const rect = (a,b) => { const d1=Math.min(Math.floor(a/Q),Math.floor(b/Q)), d2=Math.max(Math.floor(a/Q),Math.floor(b/Q)), q1=Math.min(a%Q,b%Q), q2=Math.max(a%Q,b%Q), out=[];
@@ -450,7 +483,7 @@ function drawTeacherGrid(){
   g.onpointerdown = e => { const c = cellAt(e); if (!c) return; e.preventDefault();
     anchor = +c.dataset.l; snapshot = new Set(T.sel); adding = !T.sel.has(toIST(anchor,T.tz)); last = anchor; apply(anchor); };
   window.onpointermove = e => { const c = cellAt(e);
-    if (c) $("#tReadout").textContent = cellLabel(+c.dataset.l) + (T.tz!==IST ? `  ·  in India: ${(()=>{const ii=toIST(+c.dataset.l,T.tz);return DS[Math.floor(ii/Q)]+" "+fmt((ii%Q)*15);})()}` : "");
+    $("#tReadout").innerHTML = c ? "Pointing at: " + esc(cellLabel(+c.dataset.l)) + (T.tz!==IST ? `  ·  in India: ${(()=>{const ii=toIST(+c.dataset.l,T.tz);return DS[Math.floor(ii/Q)]+" "+fmt((ii%Q)*15);})()}` : "") : "&nbsp;";
     if (anchor === null || !c) return; const li = +c.dataset.l; if (li !== last){ last = li; apply(li); } };
   window.onpointerup = () => { anchor = null; snapshot = null; };
 }
@@ -460,16 +493,19 @@ function paintTeacher(){
   $("#totalHrs").textContent = n ? `${hrs % 1 ? hrs.toFixed(2).replace(/0$/,"") : hrs} hours a week marked` : "Nothing marked yet";
   const local = summarise(T.sel, T.tz), ist = T.tz !== IST ? summarise(T.sel, IST) : null;
   const rows = DAYS.map((d,i) => local[i].length ? `<div><b>${DS[i]}</b> ${local[i].join(", ")}</div>` : "").join("");
-  $("#tSummary").innerHTML = rows ? rows + (ist ? `<div class="faint" style="grid-column:1/-1">We'll store these in India time (IST) so the team can match across time zones.</div>` : "") : `<span class="faint small">Your marked times will be listed here.</span>`;
+  const ps = peakStats(T.sel);
+  $("#tSummary").innerHTML = rows ? rows + `<div style="grid-column:1/-1;margin-top:4px"><b>${fh(ps.peak)}</b> of your ${fh(ps.total)} hours fall in VSA's peak hours.</div>` + (ist ? `<div class="faint" style="grid-column:1/-1">We'll store these in India time (IST) so the team can match across time zones.</div>` : "") : `<span class="faint small">Your marked times will be listed here.</span>`;
 }
 async function submitTeacher(){
   const name = $("#fName").value.trim(), email = $("#fEmail").value.trim().toLowerCase(), msg = $("#submitMsg");
   if (!name){ msg.textContent = "Please add your name."; $("#fName").focus(); return; }
   if (!/^\S+@\S+\.\S+$/.test(email)){ msg.textContent = "Please check your email address."; $("#fEmail").focus(); return; }
+  const phone = $("#fPhone").value.trim();
+  if (phone.replace(/\D/g,"").length < 8){ msg.textContent = "Please add your WhatsApp number, with the country code."; $("#fPhone").focus(); return; }
   if (!T.subjects.size){ msg.textContent = "Please choose at least one thing you teach."; return; }
   if (!T.sel.size){ msg.textContent = "Please mark at least one time in the grid."; return; }
   const istSum = summarise(T.sel, IST).map((r,i) => r.length ? DS[i] + " " + r.join(", ") : "").filter(Boolean).join("; ");
-  const row = { name, email, phone: $("#fPhone").value.trim(), subjects:[...T.subjects], timezone:T.tz, slots: encode(T.sel), summaryIST: istSum, notes: $("#fNotes").value.trim() };
+  const row = { name, email, phone, subjects:[...T.subjects], timezone:T.tz, slots: encode(T.sel), summaryIST: istSum, notes: "" };
   const b = $("#submitBtn"); b.disabled = true; msg.textContent = "Sending…";
   try{ await apiSubmit(row); msg.textContent = ""; $("#doneName").textContent = name.split(" ")[0];
     $("#tForm").classList.add("hidden"); $("#tDone").classList.remove("hidden"); window.scrollTo(0,0);
@@ -481,7 +517,7 @@ async function submitTeacher(){
 /* ==================================================================
    TEAM VIEW
    ================================================================== */
-const S = { rows:[], parsed:[], tz:IST, days:new Set([3]), from:14*60, to:15*60, subj:"", mode:"full", hideStale:false, tab:"match", open:null, loaded:null };
+const S = { rows:[], parsed:[], tz:IST, days:new Set([3]), from:14*60, to:15*60, subj:"", mode:"full", hideStale:false, tab:"week", open:null, loaded:null, wEmail:null };
 function teamInit(){
   fillTzSelect($("#qTz"), S.tz);
   $("#staleDays").textContent = CONFIG.STALE_DAYS;
@@ -493,13 +529,16 @@ function teamInit(){
     (g.instruments ? `<option value="@inst">Any Carnatic instrument</option>` : "") +
     g.items.map(s => `<option>${esc(s)}</option>`).join("") + `</optgroup>`).join("");
   $$("#qDays button").forEach(b => b.onclick = () => { const d = +b.dataset.d; S.days.has(d) && S.days.size > 1 ? S.days.delete(d) : S.days.add(d); syncControls(); render(); });
-  $("#qTz").onchange = e => { S.tz = e.target.value; render(); };
+  fillTzSelect($("#wTz"), S.tz);
+  $("#qTz").onchange = e => { S.tz = e.target.value; $("#wTz").value = S.tz; render(); };
+  $("#wTz").onchange = e => { S.tz = e.target.value; $("#qTz").value = S.tz; render(); };
+  $("#wTeacher").onchange = e => { S.wEmail = e.target.value; render(); };
   $("#qFrom").onchange = e => { S.from = +e.target.value; if (S.to <= S.from) S.to = Math.min(1440, S.from + 60); syncControls(); render(); };
   $("#qTo").onchange = e => { S.to = +e.target.value; if (S.to <= S.from) S.from = Math.max(0, S.to - 60); syncControls(); render(); };
   $("#qSubj").onchange = e => { S.subj = e.target.value; render(); };
   $("#qMode").onchange = e => { S.mode = e.target.value; render(); };
   $("#qStale").onchange = e => { S.hideStale = e.target.checked; render(); };
-  $$(".tabs button").forEach(b => b.onclick = () => { S.tab = b.dataset.tab; $$(".tabs button").forEach(x => x.classList.toggle("on", x===b)); ["match","heat","dir"].forEach(t => $("#tab-"+t).classList.toggle("hidden", t!==S.tab)); render(); });
+  $$(".tabs button").forEach(b => b.onclick = () => switchTab(b.dataset.tab));
   $("#refreshBtn").onclick = () => refreshTeam();
   $("#dirSearch").oninput = () => renderDir();
   $("#copyCsv").onclick = copyCsv;
@@ -530,7 +569,46 @@ function pool(){ return S.parsed.filter(r => teaches(r) && !(S.hideStale && isSt
 function windowFor(d){ const out = []; for (let m = S.from; m < S.to; m += 15) out.push(toIST(d*Q + m/15, S.tz)); return out; }
 function ago(iso){ if (!iso) return "unknown"; const days = Math.floor((Date.now() - new Date(iso))/864e5);
   return days < 1 ? "today" : days < 2 ? "yesterday" : days < 45 ? days + " days ago" : Math.round(days/30) + " months ago"; }
-function render(){ if (S.tab === "match") renderMatch(); else if (S.tab === "heat") renderHeat(); else renderDir(); }
+function switchTab(t){
+  S.tab = t; $$(".tabs button").forEach(x => x.classList.toggle("on", x.dataset.tab === t));
+  ["week","match","heat","dir"].forEach(k => $("#tab-"+k).classList.toggle("hidden", k !== t));
+  $("#filterCard").classList.toggle("hidden", !(t === "match" || t === "heat"));
+  render();
+}
+function openWeek(email){ S.wEmail = email; switchTab("week"); window.scrollTo({top:0, behavior:"smooth"}); }
+function render(){ if (S.tab === "week") renderWeek(); else if (S.tab === "match") renderMatch(); else if (S.tab === "heat") renderHeat(); else renderDir(); }
+
+/* ---------- Teacher's week: one teacher's full spread, for screening ---------- */
+function renderWeek(){
+  const all = S.parsed.slice().sort((a,b) => a.name.localeCompare(b.name));
+  if (!all.length){ $("#wTeacher").innerHTML = ""; $("#wBody").innerHTML = `<div class="empty">No teachers have filled in the form yet.</div>`; return; }
+  if (!all.some(r => r.email === S.wEmail)) S.wEmail = all[0].email;
+  $("#wTeacher").innerHTML = all.map(r => `<option value="${esc(r.email)}">${esc(r.name)}${r.subjects.length ? " · " + esc(r.subjects.join(", ")) : ""}</option>`).join("");
+  $("#wTeacher").value = S.wEmail;
+  const r = all.find(x => x.email === S.wEmail), p = peakStats(r.set), pct = p.total ? Math.round(100*p.peak/p.total) : 0;
+  const tzName = tzLabel(S.tz).split(" · ")[0];
+  $("#wBody").innerHTML = `
+    <div class="card">
+      <div class="row" style="align-items:flex-start">
+        <div><h2>${esc(r.name)}</h2><div class="meta muted" style="margin-top:4px">${esc(r.subjects.join(" · "))}</div></div>
+        <span class="spacer"></span>
+        <div class="small" style="text-align:right">${esc(r.email)} <button class="copy" data-copy="${esc(r.email)}">copy</button>${r.phone ? `<br>WhatsApp ${esc(r.phone)} <button class="copy" data-copy="${esc(r.phone)}">copy</button>` : ""}
+          <br><span class="faint">Based in ${esc(tzLabel(r.timezone||IST).split(" · ")[0])} · ${isStale(r) ? `<span class="badge stale">⚠ updated ${esc(ago(r.updated))}</span>` : "updated " + esc(ago(r.updated))}</span></div>
+      </div>
+      <div class="stats">
+        <div class="stat key"><b>${fh(p.peak)} h</b><span>in VSA peak hours (${pct}% of ${fh(p.total)} h marked)</span></div>
+        <div class="stat"><b>${fh(p.wm)} h</b><span>Weekday mornings, 4–8 AM IST</span></div>
+        <div class="stat"><b>${fh(p.we)} h</b><span>Weekday evenings, 4 PM–midnight IST</span></div>
+        <div class="stat"><b>${fh(p.wk)} h</b><span>Weekends (Sat & Sun IST)</span></div>
+      </div>
+      <div class="legend2"><span><i style="background:var(--field)"></i>Peak hours</span><span><i style="background:repeating-linear-gradient(135deg,var(--field) 0 4px,#E6D8C2 4px 6px)"></i>Fewer students</span><span><i style="background:var(--pick)"></i>Available</span><span class="faint">Times in ${esc(tzName)}</span></div>
+      <div class="week view" id="wGrid"></div>
+      <div class="summary" style="margin-top:16px">${summarise(r.set, S.tz).map((x,i) => x.length ? `<div><b>${DS[i]}</b> ${x.join(", ")}</div>` : "").join("") || `<span class="faint">No times marked.</span>`}</div>
+    </div>`;
+  const g = $("#wGrid"); buildWeek(g, {startHour: S.tz === IST ? 4 : 0, readonly:true}); shadeLow(g, S.tz);
+  g.querySelectorAll(".cell").forEach(c => c.classList.toggle("on", r.set.has(toIST(+c.dataset.l, S.tz))));
+  $$("#wBody .copy").forEach(b => b.onclick = () => copyText(b.dataset.copy, "Copied"));
+}
 
 function renderMatch(){
   const days = [...S.days].sort(), list = [];
@@ -551,9 +629,11 @@ function renderMatch(){
       <div class="badges">${per.map(p => p.hit===p.n ? `<span class="badge full">✓ ${DS[p.d]} all</span>` : p.hit ? `<span class="badge part">◐ ${DS[p.d]} ${p.hit*15} min</span>` : `<span class="badge">✕ ${DS[p.d]}</span>`).join("")}</div>
       ${theirs ? `<div class="small muted">${theirs}</div>` : ""}
       <div class="small">${esc(r.email)} <button class="copy" data-copy="${esc(r.email)}">copy</button>${r.phone ? ` · ${esc(r.phone)}` : ""}</div>
+      <div><button class="linkbtn" data-week="${esc(r.email)}">See full week →</button></div>
       ${r.notes ? `<div class="small muted" style="font-style:italic">“${esc(r.notes)}”</div>` : ""}
     </div>`; }).join("") : `<div class="empty">No matches for this window yet.</div>`;
   $$("#qResults .copy").forEach(b => b.onclick = () => copyText(b.dataset.copy, "Email copied"));
+  $$("#qResults [data-week]").forEach(b => b.onclick = () => openWeek(b.dataset.week));
 }
 
 function renderHeat(){
@@ -570,7 +650,7 @@ function renderHeat(){
     c.onmousemove = e => { const tip = $("#tip"); tip.style.left = Math.min(innerWidth - 270, e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px"; };
     c.onmouseleave = () => $("#tip").classList.add("hidden");
     c.onclick = () => { $("#tip").classList.add("hidden"); S.days = new Set([Math.floor(li/Q)]); S.from = (li%Q)*15; S.to = Math.min(1440, S.from + 60); syncControls();
-      S.tab = "match"; $$(".tabs button").forEach(x => x.classList.toggle("on", x.dataset.tab==="match")); ["match","heat","dir"].forEach(t => $("#tab-"+t).classList.toggle("hidden", t!=="match")); render(); window.scrollTo({top:0,behavior:"smooth"}); };
+      switchTab("match"); window.scrollTo({top:0,behavior:"smooth"}); };
   });
   $("#heatSubj").textContent = S.subj ? ` teaching ${S.subj === "@inst" ? "a Carnatic instrument" : S.subj}` : "";
 }
@@ -585,18 +665,19 @@ function miniWeek(set, tz){ // small SVG week strip, in tz
   return `<svg class="mini" width="${w}" height="${h+16}" viewBox="0 0 ${w} ${h+16}" role="img" aria-label="Weekly availability"><rect width="${w}" height="${h}" fill="var(--line-2)" rx="4"/>${grid}${rects}${labels}</svg>`;
 }
 function renderDir(){
+  // The full list: every teacher, with their peak-hours total. Click a row to see their week.
   const q = $("#dirSearch").value.trim().toLowerCase();
-  const rows = pool().filter(r => !q || (r.name+" "+r.email+" "+r.subjects.join(" ")).toLowerCase().includes(q)).sort((a,b) => a.name.localeCompare(b.name));
-  $("#dirTable").innerHTML = `<tr><th>Teacher</th><th>Teaches</th><th>Hours / week</th><th>Based in</th><th>Updated</th></tr>` +
-    (rows.length ? rows.map(r => `<tr class="r" data-e="${esc(r.email)}"><td><b>${esc(r.name)}</b><div class="small muted">${esc(r.email)}</div></td><td class="small">${esc(r.subjects.join(", "))}</td><td>${r.set.size/4}</td><td class="small">${esc(tzLabel(r.timezone||IST).split(" · ")[0])}</td><td class="small">${isStale(r) ? `<span class="badge stale">⚠ ${esc(ago(r.updated))}</span>` : esc(ago(r.updated))}</td></tr>` +
-      (S.open === r.email ? `<tr class="exp"><td colspan="5"><div class="row" style="align-items:flex-start;gap:24px">${miniWeek(r.set, S.tz)}<div class="summary" style="flex:1">${summarise(r.set, S.tz).map((x,i) => x.length ? `<div><b>${DS[i]}</b> ${x.join(", ")}</div>` : "").join("")}<div class="faint" style="grid-column:1/-1">Shown in ${esc(tzLabel(S.tz).split(" · ")[0])}${r.notes ? ` · Note: “${esc(r.notes)}”` : ""}</div></div></div></td></tr>` : "")).join("")
-    : `<tr><td colspan="5" class="muted" style="padding:24px;text-align:center">No teachers yet.</td></tr>`);
-  $$("#dirTable tr.r").forEach(tr => tr.onclick = () => { S.open = S.open === tr.dataset.e ? null : tr.dataset.e; renderDir(); });
+  const rows = S.parsed.filter(r => !q || (r.name+" "+r.email+" "+r.subjects.join(" ")).toLowerCase().includes(q)).sort((a,b) => a.name.localeCompare(b.name));
+  $("#dirTable").innerHTML = `<tr><th>Teacher</th><th>Teaches</th><th>Peak hours / week</th><th>Total hours</th><th>Based in</th><th>Updated</th></tr>` +
+    (rows.length ? rows.map(r => { const p = peakStats(r.set);
+      return `<tr class="r" data-e="${esc(r.email)}" title="See ${esc(r.name)}'s week"><td><b>${esc(r.name)}</b><div class="small muted">${esc(r.email)}${r.phone ? " · " + esc(r.phone) : ""}</div></td><td class="small">${esc(r.subjects.join(", "))}</td><td><b>${fh(p.peak)}</b></td><td>${fh(p.total)}</td><td class="small">${esc(tzLabel(r.timezone||IST).split(" · ")[0])}</td><td class="small">${isStale(r) ? `<span class="badge stale">⚠ ${esc(ago(r.updated))}</span>` : esc(ago(r.updated))}</td></tr>`; }).join("")
+    : `<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">No teachers yet.</td></tr>`);
+  $$("#dirTable tr.r").forEach(tr => tr.onclick = () => openWeek(tr.dataset.e));
 }
 function copyCsv(){
-  const head = ["Name","Email","WhatsApp","Subjects","Time zone","Hours per week","Availability (IST)","Notes","Last updated"];
+  const head = ["Name","Email","WhatsApp","Subjects","Time zone","Peak hours per week","Hours per week","Availability (IST)","Notes","Last updated"];
   const q = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
-  const lines = [head.map(q).join(",")].concat(pool().map(r => [r.name, r.email, r.phone, r.subjects.join("; "), r.timezone, r.set.size/4,
+  const lines = [head.map(q).join(",")].concat(S.parsed.map(r => [r.name, r.email, r.phone, r.subjects.join("; "), r.timezone, peakStats(r.set).peak, r.set.size/4,
     summarise(r.set, IST).map((x,i) => x.length ? DS[i]+" "+x.join(", ") : "").filter(Boolean).join("; "), r.notes, r.updated ? new Date(r.updated).toISOString().slice(0,10) : ""].map(q).join(",")));
   copyText(lines.join("\n"), "Copied — paste into a sheet");
 }
@@ -610,11 +691,11 @@ function demoSeed(){
   const mk = (spec) => { const s = new Set(); spec.forEach(([days, h1, m1, h2, m2]) => days.forEach(d => { for (let m = h1*60+m1; m < h2*60+m2; m += 15) s.add(d*Q + m/15); })); return encode(s); };
   const daysAgo = n => new Date(Date.now() - n*864e5).toISOString();
   demoRows = [
-    { name:"Apeksha Bhat", email:"apeksha@example.com", phone:"", subjects:["Carnatic vocal"], timezone:IST, notes:"Converted from her availability spreadsheet", updated:daysAgo(3), created:daysAgo(3),
+    { name:"Apeksha Bhat", email:"apeksha@example.com", phone:"+91 90000 00000", subjects:["Carnatic vocal"], timezone:IST, notes:"", updated:daysAgo(3), created:daysAgo(3),
       slots: mk([[[1,2,3,4],4,0,5,0],[[0,5,6],17,30,18,30],[[0,1,2,3,4,5,6],18,45,19,45],[[0,6],9,15,10,15],[[0,6],10,30,11,30],[[6],13,0,14,0],[[0],15,30,16,30]]) },
     { name:"Sample · Meera R.", email:"meera@example.com", phone:"+91 90000 00001", subjects:["Carnatic vocal","Slokas & Tamil chants"], timezone:IST, notes:"", updated:daysAgo(12), created:daysAgo(40),
       slots: mk([[[1,3,5],14,0,17,0],[[2,4],6,0,8,0],[[0],9,0,12,0]]) },
-    { name:"Sample · Arjun K.", email:"arjun@example.com", phone:"", subjects:["Mridangam","Kanjira","Konnakol"], timezone:IST, notes:"Mridangam and kanjira", updated:daysAgo(200), created:daysAgo(200),
+    { name:"Sample · Arjun K.", email:"arjun@example.com", phone:"", subjects:["Mridangam","Kanjira","Konnakol"], timezone:IST, notes:"", updated:daysAgo(200), created:daysAgo(200),
       slots: mk([[[1,2,3,4,5],19,0,22,0],[[3],13,0,16,0]]) },
     { name:"Sample · Lavanya S.", email:"lavanya@example.com", phone:"", subjects:["Carnatic vocal","Veena"], timezone:"America/New_York", notes:"", updated:daysAgo(30), created:daysAgo(90),
       slots: mk([[[1,2,3,4,5],5,30,8,30],[[3,6],19,30,22,30]]) },

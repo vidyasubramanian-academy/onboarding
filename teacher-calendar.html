@@ -94,10 +94,11 @@ label.f textarea{min-height:64px;resize:vertical}
 .week .dh{position:sticky;top:0;z-index:2;background:var(--cream);text-align:center;font-size:12px;font-weight:600;padding:8px 0 6px;border-bottom:1px solid var(--line);color:var(--ink-2)}
 .week .dh small{display:block;font-weight:400;color:var(--ink-3);font-size:11px}
 .week .tl{font-size:11px;color:var(--ink-3);text-align:right;padding-right:8px;line-height:1;transform:translateY(-5px);touch-action:pan-y}
-.cell{height:12px;border-left:1px solid var(--line-2);background:var(--field);touch-action:none;cursor:pointer}
+.cell{height:16px;border-left:1px solid var(--line-2);background:var(--field);touch-action:none;cursor:pointer}
 .cell.hr{border-top:1px solid var(--line)}
 .cell.half{border-top:1px dashed var(--line-2)}
 .cell.low{background:repeating-linear-gradient(135deg,var(--field) 0 4px,#E6D8C2 4px 6px)}
+.cell.short{box-shadow:inset 0 0 0 2px #B3261E}
 .cell.on{background:var(--pick);border-left-color:var(--pick-edge)}
 .cell.preview-add{background:color-mix(in srgb,var(--pick) 60%,var(--card))}
 .cell.preview-del{background:color-mix(in srgb,var(--ink-3) 25%,var(--card))}
@@ -110,6 +111,10 @@ label.f textarea{min-height:64px;resize:vertical}
 
 .legend2{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin:4px 0 10px}
 .legend2 i{display:inline-block;width:18px;height:12px;border:1px solid var(--line);border-radius:3px;vertical-align:-2px;margin-right:6px}
+.durhint{font-size:14px;color:var(--ink);margin:0 0 8px}
+.shortwarn{font-size:14px;color:#B3261E;font-weight:700;margin:6px 0 0}
+.classlen{margin:6px 0 0;padding-left:20px}
+.classlen li{margin:2px 0}
 .peaknote{font-size:14px;padding:12px 14px;border-radius:12px;background:var(--warn-soft);color:var(--ink);margin:0 0 10px;border-left:4px solid var(--gold)}
 .hint{display:block;font-weight:400;font-size:13px;color:var(--ink-3);margin-top:4px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
@@ -172,7 +177,7 @@ table.dir tr.r:hover td{background:var(--line-2)}
   .wrap{padding:14px 12px 70px} .card{padding:16px}
   .week{grid-template-columns:44px repeat(7,minmax(0,1fr))}
   .week .dh{font-size:11px} .week .dh small{display:none}
-  .cell{height:14px}
+  .cell{height:18px}
 }
 </style>
 </head>
@@ -211,7 +216,8 @@ table.dir tr.r:hover td{background:var(--line-2)}
 
         <div class="card">
           <div class="step-label">Step 2 · Your week</div>
-          <div class="peaknote"><b>Most of our students learn early in the morning, in the evening, and at weekends.</b> Please mark every slot you can offer between <b>4–8 AM</b> and <b>4 PM–midnight</b> (India time) on weekdays, and all the slots you can offer at <b>weekends</b>. Weekday daytime hours (shaded) have fewer students, but you may mark them too.</div>
+          <div class="peaknote"><b>Most of our students learn early in the morning, in the evening, and at weekends.</b> Please mark every slot you can offer between <b>4–8 AM</b> and <b>4 PM–midnight</b> (India time) on weekdays, and all the slots you can offer at <b>weekends</b>. Weekday daytime hours (shaded) have fewer students.</div>
+          <div class="peaknote"><b>Class lengths</b><ul class="classlen"><li>If you teach <b>music (vocal or instrumental), dance, yoga or Konnakol</b>, please mark your availability in <b>60-minute slots</b>.</li><li>If you teach <b>slokas, languages or Vedic Math</b>, you may mark <b>30-minute slots</b>.</li></ul></div>
           <p class="muted small" style="margin-bottom:6px">Press and drag across the grid to mark the times you're free. Drag over marked times to clear them. Times are shown in <b id="tzName">your time zone</b>. On a phone, scroll the page using the time column on the left.</p>
           <div class="legend2"><span><i style="background:var(--field)"></i>Peak hours</span><span><i style="background:repeating-linear-gradient(135deg,var(--field) 0 4px,#E6D8C2 4px 6px)"></i>Fewer students</span><span><i style="background:var(--pick)"></i>Marked as available</span></div>
           <div class="gridtools">
@@ -221,8 +227,10 @@ table.dir tr.r:hover td{background:var(--line-2)}
             <span class="spacer"></span>
             <span class="small muted" id="totalHrs">Nothing marked yet</span>
           </div>
+          <p class="durhint" id="durHint"></p>
           <div class="readout" id="tReadout">&nbsp;</div>
           <div class="week" id="tGrid"></div>
+          <div class="shortwarn" id="shortWarn"></div>
         </div>
 
         <div class="card stack">
@@ -423,20 +431,23 @@ async function apiSubmit(row){
 /* ==================================================================
    Shared week-grid renderer
    ================================================================== */
+const STEP = 2;   // each grid square is 2 quarter-hours = 30 minutes (VSA's shortest class)
 function buildWeek(el, {startHour=0, readonly=false}){
   el.innerHTML = "";
   const head = document.createElement("div"); head.className = "dh"; head.innerHTML = "&nbsp;"; el.appendChild(head);
   DAYS.forEach((d,i) => { const h = document.createElement("div"); h.className = "dh"; h.innerHTML = `${DS[i]}<small>${d}</small>`; el.appendChild(h); });
-  for (let q = startHour*4; q < Q; q++){
+  for (let q = startHour*4; q < Q; q += STEP){
     const tl = document.createElement("div"); tl.className = "tl"; tl.textContent = q % 4 === 0 ? fmt(q*15).replace(":00","") : ""; el.appendChild(tl);
     for (let d = 0; d < 7; d++){
       const c = document.createElement("div");
-      c.className = "cell" + (q%4===0 ? " hr" : q%2===0 ? " half" : "") + (d===6 ? " end" : "");
+      c.className = "cell" + (q%4===0 ? " hr" : " half") + (d===6 ? " end" : "");
       c.dataset.l = d*Q + q; el.appendChild(c);
     }
   }
 }
-const cellLabel = (li) => `${DAYS[Math.floor(li/Q)]} ${fmtRange((li%Q)*15, (li%Q)*15+15)}`;
+const cellLabel = (li) => `${DAYS[Math.floor(li/Q)]} ${fmtRange((li%Q)*15, (li%Q)*15+30)}`;
+const cellQs = li => { const out = []; for (let k = 0; k < STEP; k++) out.push(li + k); return out; };   // quarter-hours in a square
+const cellOn = (set, li, tz) => cellQs(li).every(q => set.has(toIST(q, tz)));
 
 /* ==================================================================
    TEACHER VIEW
@@ -448,12 +459,25 @@ function peakStats(set){ const c = {wm:0, we:0, wk:0}; set.forEach(ii => { const
   return { total:set.size/4, wm:c.wm/4, we:c.we/4, wk:c.wk/4, peak:(c.wm+c.we+c.wk)/4 }; }
 const fh = h => (h % 1 ? h.toFixed(2).replace(/0$/,"") : String(h));
 function shadeLow(grid, tz){ grid.querySelectorAll(".cell").forEach(c => c.classList.toggle("low", !peakKind(toIST(+c.dataset.l, tz)))); }
+/* Class length: music, dance, yoga and Konnakol classes are 60 minutes; sloka, language and Vedic Math are 30.
+   A teacher of both gets the shorter minimum (a 60-minute class still fits any block of 60 minutes or more). */
+const THIRTY_MIN = ["Slokas & Tamil chants","Languages","Fun with Vedic Math"];
+function minQ(){ // shortest block allowed, in quarter-hours
+  if ([...T.subjects].some(s => THIRTY_MIN.includes(s))) return 2;
+  return T.subjects.size ? 4 : 2;
+}
+function shortRuns(){ // marked blocks shorter than one class, in the teacher's own time zone
+  const loc = [...T.sel].map(i => toLocal(i, T.tz)).sort((a,b) => a-b), runs = []; let s = null, p = null;
+  for (const li of loc){ if (s !== null && li === p+1 && Math.floor(li/Q) === Math.floor(p/Q)){ p = li; } else { if (s !== null) runs.push([s,p]); s = p = li; } }
+  if (s !== null) runs.push([s,p]);
+  return runs.filter(([a,b]) => b - a + 1 < minQ());
+}
 const T = { tz: (({"Asia/Calcutta":IST})[Intl.DateTimeFormat().resolvedOptions().timeZone] || Intl.DateTimeFormat().resolvedOptions().timeZone || IST), sel: new Set(), subjects: new Set(), night:false };
 function teacherInit(){
   fillTzSelect($("#fTz"), T.tz);
   $("#fSubjects").innerHTML = CONFIG.SUBJECT_GROUPS.map(g => `<div class="sgroup"><div class="sgl">${esc(g.group)}</div><div class="chips">` +
     g.items.map(s => `<span class="chip" tabindex="0" role="checkbox" aria-checked="false" data-s="${esc(s)}">${esc(s)}</span>`).join("") + `</div></div>`).join("");
-  $$("#fSubjects .chip").forEach(ch => { const tog = () => { const s = ch.dataset.s; T.subjects.has(s) ? T.subjects.delete(s) : T.subjects.add(s); ch.classList.toggle("on"); ch.setAttribute("aria-checked", ch.classList.contains("on")); };
+  $$("#fSubjects .chip").forEach(ch => { const tog = () => { const s = ch.dataset.s; T.subjects.has(s) ? T.subjects.delete(s) : T.subjects.add(s); ch.classList.toggle("on"); ch.setAttribute("aria-checked", ch.classList.contains("on")); paintTeacher(); };
     ch.onclick = tog; ch.onkeydown = e => { if (e.key===" "||e.key==="Enter"){ e.preventDefault(); tog(); } }; });
   $("#fTz").onchange = e => { T.tz = e.target.value; T.night = false; $("#toggleNight").textContent = "Show 12–4 AM"; phoneHint(); drawTeacherGrid(); };
   phoneHint();
@@ -477,24 +501,36 @@ function drawTeacherGrid(){
   $("#tReadout").innerHTML = "&nbsp;";
   let anchor = null, snapshot = null, adding = true, last = null;
   const cellAt = e => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.classList.contains("cell") && g.contains(el) ? el : null; };
-  const rect = (a,b) => { const d1=Math.min(Math.floor(a/Q),Math.floor(b/Q)), d2=Math.max(Math.floor(a/Q),Math.floor(b/Q)), q1=Math.min(a%Q,b%Q), q2=Math.max(a%Q,b%Q), out=[];
+  const rect = (a,b) => { const d1=Math.min(Math.floor(a/Q),Math.floor(b/Q)), d2=Math.max(Math.floor(a/Q),Math.floor(b/Q)), q1=Math.min(a%Q,b%Q), q2=Math.max(a%Q,b%Q)+STEP-1, out=[];
     for (let d=d1; d<=d2; d++) for (let q=q1; q<=q2; q++) out.push(d*Q+q); return out; };
+  let moved = false;
   const apply = (li) => { T.sel = new Set(snapshot); rect(anchor, li).forEach(l => { const ii = toIST(l,T.tz); adding ? T.sel.add(ii) : T.sel.delete(ii); }); paintTeacher(); };
   g.onpointerdown = e => { const c = cellAt(e); if (!c) return; e.preventDefault();
-    anchor = +c.dataset.l; snapshot = new Set(T.sel); adding = !T.sel.has(toIST(anchor,T.tz)); last = anchor; apply(anchor); };
+    anchor = +c.dataset.l; snapshot = new Set(T.sel); adding = !cellOn(T.sel, anchor, T.tz); last = anchor; moved = false; apply(anchor); };
   window.onpointermove = e => { const c = cellAt(e);
     $("#tReadout").innerHTML = c ? "Pointing at: " + esc(cellLabel(+c.dataset.l)) + (T.tz!==IST ? `  ·  in India: ${(()=>{const ii=toIST(+c.dataset.l,T.tz);return DS[Math.floor(ii/Q)]+" "+fmt((ii%Q)*15);})()}` : "") : "&nbsp;";
-    if (anchor === null || !c) return; const li = +c.dataset.l; if (li !== last){ last = li; apply(li); } };
-  window.onpointerup = () => { anchor = null; snapshot = null; };
+    if (anchor === null || !c) return; const li = +c.dataset.l; if (li !== last){ last = li; moved = true; apply(li); } };
+  window.onpointerup = () => {
+    // A single click on an empty square marks one whole class: 60 minutes where that's the class length
+    if (anchor !== null && !moved && adding && minQ() > STEP && (anchor % Q) + minQ() <= Q){
+      for (let k = STEP; k < minQ(); k++) T.sel.add(toIST(anchor + k, T.tz)); paintTeacher(); }
+    anchor = null; snapshot = null; };
 }
 function paintTeacher(){
-  $$("#tGrid .cell").forEach(c => c.classList.toggle("on", T.sel.has(toIST(+c.dataset.l, T.tz))));
+  const short = new Set(); shortRuns().forEach(([a,b]) => { for (let i = a; i <= b; i++) short.add(i - (i % STEP)); });
+  $$("#tGrid .cell").forEach(c => { c.classList.toggle("on", cellOn(T.sel, +c.dataset.l, T.tz)); c.classList.toggle("short", short.has(+c.dataset.l)); });
+  const sixty = [...T.subjects].some(s => !THIRTY_MIN.includes(s)), thirty = [...T.subjects].some(s => THIRTY_MIN.includes(s));
+  $("#durHint").innerHTML = !T.subjects.size ? "Each square is 30 minutes. Please choose what you teach above, and we'll show the shortest block to mark."
+    : minQ() === 4 ? "Your classes are <b>60 minutes</b> long, so please mark blocks of <b>at least 1 hour</b>. One click marks a full hour; drag to mark longer stretches."
+    : sixty && thirty ? "Your classes are 30 or 60 minutes long, so please mark blocks of <b>at least 30 minutes</b>. Each square is 30 minutes."
+    : "Your classes are <b>30 minutes</b> long. Each square is 30 minutes; drag to mark longer stretches.";
+  $("#shortWarn").textContent = short.size ? "Blocks outlined in red are shorter than one class. Please extend or clear them." : "";
   const n = T.sel.size, hrs = n/4;
-  $("#totalHrs").textContent = n ? `${hrs % 1 ? hrs.toFixed(2).replace(/0$/,"") : hrs} hours a week marked` : "Nothing marked yet";
+  $("#totalHrs").textContent = n ? `${hrs % 1 ? hrs.toFixed(2).replace(/0$/,"") : hrs} ${hrs === 1 ? "hour" : "hours"} a week marked` : "Nothing marked yet";
   const local = summarise(T.sel, T.tz), ist = T.tz !== IST ? summarise(T.sel, IST) : null;
   const rows = DAYS.map((d,i) => local[i].length ? `<div><b>${DS[i]}</b> ${local[i].join(", ")}</div>` : "").join("");
   const ps = peakStats(T.sel);
-  $("#tSummary").innerHTML = rows ? rows + `<div style="grid-column:1/-1;margin-top:4px"><b>${fh(ps.peak)}</b> of your ${fh(ps.total)} hours fall in VSA's peak hours.</div>` + (ist ? `<div class="faint" style="grid-column:1/-1">We'll store these in India time (IST) so the team can match across time zones.</div>` : "") : `<span class="faint small">Your marked times will be listed here.</span>`;
+  $("#tSummary").innerHTML = rows ? rows + `<div style="grid-column:1/-1;margin-top:4px"><strong>${fh(ps.peak)}</strong> of your ${fh(ps.total)} hours fall in VSA's peak hours.</div>` + (ist ? `<div class="faint" style="grid-column:1/-1">We'll store these in India time (IST) so the team can match across time zones.</div>` : "") : `<span class="faint small">Your marked times will be listed here.</span>`;
 }
 async function submitTeacher(){
   const name = $("#fName").value.trim(), email = $("#fEmail").value.trim().toLowerCase(), msg = $("#submitMsg");
@@ -504,6 +540,10 @@ async function submitTeacher(){
   if (phone.replace(/\D/g,"").length < 8){ msg.textContent = "Please add your WhatsApp number, with the country code."; $("#fPhone").focus(); return; }
   if (!T.subjects.size){ msg.textContent = "Please choose at least one thing you teach."; return; }
   if (!T.sel.size){ msg.textContent = "Please mark at least one time in the grid."; return; }
+  const sr = shortRuns();
+  if (sr.length){ const show = sr.slice(0,3).map(([a,b]) => DS[Math.floor(a/Q)] + " " + fmtRange((a%Q)*15, (b%Q+1)*15)).join("; ");
+    msg.textContent = `Some blocks are shorter than one ${minQ()===4 ? "60" : "30"}-minute class (${show}${sr.length>3 ? "…" : ""}). Please extend or clear them.`;
+    $("#shortWarn").scrollIntoView({behavior:"smooth", block:"center"}); return; }
   const istSum = summarise(T.sel, IST).map((r,i) => r.length ? DS[i] + " " + r.join(", ") : "").filter(Boolean).join("; ");
   const row = { name, email, phone, subjects:[...T.subjects], timezone:T.tz, slots: encode(T.sel), summaryIST: istSum, notes: "" };
   const b = $("#submitBtn"); b.disabled = true; msg.textContent = "Sending…";
@@ -522,7 +562,7 @@ function teamInit(){
   fillTzSelect($("#qTz"), S.tz);
   $("#staleDays").textContent = CONFIG.STALE_DAYS;
   $("#qDays").innerHTML = DS.map((d,i) => `<button data-d="${i}">${d}</button>`).join("");
-  const times = []; for (let m = 0; m <= 1440; m += 15) times.push(m);
+  const times = []; for (let m = 0; m <= 1440; m += 30) times.push(m);
   $("#qFrom").innerHTML = times.slice(0,-1).map(m => `<option value="${m}">${fmt(m)}</option>`).join("");
   $("#qTo").innerHTML = times.slice(1).map(m => `<option value="${m}">${m===1440 ? "Midnight" : fmt(m)}</option>`).join("");
   $("#qSubj").innerHTML += CONFIG.SUBJECT_GROUPS.map(g => `<optgroup label="${esc(g.group)}">` +
@@ -606,7 +646,7 @@ function renderWeek(){
       <div class="summary" style="margin-top:16px">${summarise(r.set, S.tz).map((x,i) => x.length ? `<div><b>${DS[i]}</b> ${x.join(", ")}</div>` : "").join("") || `<span class="faint">No times marked.</span>`}</div>
     </div>`;
   const g = $("#wGrid"); buildWeek(g, {startHour: S.tz === IST ? 4 : 0, readonly:true}); shadeLow(g, S.tz);
-  g.querySelectorAll(".cell").forEach(c => c.classList.toggle("on", r.set.has(toIST(+c.dataset.l, S.tz))));
+  g.querySelectorAll(".cell").forEach(c => c.classList.toggle("on", cellOn(r.set, +c.dataset.l, S.tz)));
   $$("#wBody .copy").forEach(b => b.onclick = () => copyText(b.dataset.copy, "Copied"));
 }
 
@@ -639,13 +679,13 @@ function renderMatch(){
 function renderHeat(){
   const g = $("#hGrid"); buildWeek(g, {startHour:0, readonly:true});
   const P = pool(), counts = new Array(W).fill(0), names = Array.from({length:W}, () => []);
-  for (let li = 0; li < W; li++){ const ii = toIST(li, S.tz); P.forEach(r => { if (r.set.has(ii)){ counts[li]++; names[li].push(r.name); } }); }
+  for (let li = 0; li < W; li += STEP){ P.forEach(r => { if (cellOn(r.set, li, S.tz)){ counts[li]++; names[li].push(r.name); } }); }
   const max = Math.max(1, ...counts);
-  const qset = new Set(); [...S.days].forEach(d => { for (let m = S.from; m < S.to; m += 15) qset.add(d*Q + m/15); });
+  const qset = new Set(); [...S.days].forEach(d => { for (let m = S.from; m < S.to; m += 30) qset.add(d*Q + m/15); });
   $$("#hGrid .cell").forEach(c => { const li = +c.dataset.l, n = counts[li];
     const step = n === 0 ? 0 : Math.min(5, 1 + Math.floor((n/max) * 4.999));
     c.style.background = `var(--h${step})`;
-    if (qset.has(li)){ const up = qset.has(li-1) && (li%Q)!==0, dn = qset.has(li+1) && ((li+1)%Q)!==0; c.classList.add(up&&dn ? "q" : up ? "q-bot" : dn ? "q-top" : "q-one"); }
+    if (qset.has(li)){ const up = qset.has(li-STEP) && (li%Q)!==0, dn = qset.has(li+STEP) && ((li+STEP)%Q)!==0; c.classList.add(up&&dn ? "q" : up ? "q-bot" : dn ? "q-top" : "q-one"); }
     c.onmouseenter = e => { const tip = $("#tip"); tip.innerHTML = `<b>${esc(cellLabel(li))}</b>${n ? n + (n===1?" teacher":" teachers") + ": " + esc(names[li].slice(0,6).join(", ")) + (names[li].length>6 ? ` +${names[li].length-6} more` : "") : "No one free"}`; tip.classList.remove("hidden"); };
     c.onmousemove = e => { const tip = $("#tip"); tip.style.left = Math.min(innerWidth - 270, e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px"; };
     c.onmouseleave = () => $("#tip").classList.add("hidden");
